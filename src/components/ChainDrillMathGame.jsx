@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { generateDrillChain } from '../utils/drillGenerator';
+import './ChainDrillMathGame.css';
 
 const ChainDrillMathGame = () => {
   // Game state
