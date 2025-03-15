@@ -14,7 +14,6 @@ const ChainDrillMathGame = () => {
   const [drillChain, setDrillChain] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
   const [feedback, setFeedback] = useState([]);
-  const [inputRefs, setInputRefs] = useState([]);
   
   // Initialize game data based on difficulty
   useEffect(() => {
@@ -25,10 +24,10 @@ const ChainDrillMathGame = () => {
     const totalDrills = newDrillChain.totalDrills;
     setUserAnswers(Array(totalDrills).fill(''));
     setFeedback(Array(totalDrills).fill(''));
-    
-    // Create refs for each input
-    setInputRefs(Array(totalDrills).fill(0).map(() => React.createRef()));
   }, [difficulty]);
+  
+  // Create refs dynamically
+  const inputRefs = useRef([]);
   
   // Reset game state when difficulty changes
   useEffect(() => {
@@ -70,8 +69,8 @@ const ChainDrillMathGame = () => {
         setCurrentStep(index + 1);
         // Focus next input after a correct answer
         setTimeout(() => {
-          if (inputRefs[index + 1]?.current) {
-            inputRefs[index + 1].current.focus();
+          if (inputRefs.current[index + 1]) {
+            inputRefs.current[index + 1].focus();
           }
         }, 300);
       } else {
@@ -88,6 +87,11 @@ const ChainDrillMathGame = () => {
   const startGame = () => {
     if (!drillChain) return;
     
+    // Reset refs array with the correct number of refs
+    inputRefs.current = Array(drillChain.totalDrills)
+      .fill()
+      .map((_, i) => inputRefs.current[i] || React.createRef());
+    
     setGameActive(true);
     setCurrentStep(0);
     setUserAnswers(Array(drillChain.totalDrills).fill(''));
@@ -97,8 +101,8 @@ const ChainDrillMathGame = () => {
     
     // Focus first input
     setTimeout(() => {
-      if (inputRefs[0]?.current) {
-        inputRefs[0].current.focus();
+      if (inputRefs.current[0]) {
+        inputRefs.current[0].focus();
       }
     }, 100);
   };
@@ -203,14 +207,15 @@ const ChainDrillMathGame = () => {
         )}
       
         {/* Game chain visualization - scrollable for many drills */}
-        <div className="chain-container" style={{ maxHeight: '500px', overflowY: 'auto', padding: '1rem' }}>
+        <div className="chain-container">
           <div className="chain">
+            {/* Display ALL drills from the drillChain */}
             {drillChain.drills.map((drill, index) => {
               const isLastDrill = index === drillChain.totalDrills - 1;
               const previousAnswerCorrect = index > 0 ? feedback[index - 1] === 'correct' : true;
               
               return (
-                <div key={index}>
+                <div key={index} className="equation-container">
                   <div className="equation-row">
                     <div className="equation">
                       <div className={`number-box ${index > 0 && feedback[index - 1] === 'correct' ? 'correct-box' : ''}`}>
@@ -227,7 +232,7 @@ const ChainDrillMathGame = () => {
                       </div>
                       <div className={`result-box ${feedback[index] === 'correct' ? 'correct-box' : feedback[index] === 'incorrect' ? 'incorrect-box' : ''}`}>
                         <input
-                          ref={inputRefs[index]}
+                          ref={el => inputRefs.current[index] = el}
                           type="text"
                           value={userAnswers[index]}
                           onChange={(e) => handleAnswerChange(index, e.target.value)}
@@ -247,10 +252,10 @@ const ChainDrillMathGame = () => {
                     
                     {/* Arrow to next equation, except for the last one */}
                     {!isLastDrill && (
-                      <>
+                      <div className="arrow-container">
                         <div className="arrow"></div>
                         <div className="arrow-tip"></div>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
