@@ -1,5 +1,1 @@
-module.exports = {
-  plugins: {
-    autoprefixer: {},
-  },
-};
+// Empty file - to be deleted
