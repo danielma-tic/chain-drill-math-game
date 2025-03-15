@@ -25,20 +25,20 @@ const Numpad = ({ onAnswer }) => {
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
           <button
             key={num}
-            className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm"
+            className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm number"
             onClick={() => handleNumberClick(num)}
           >
             {num}
           </button>
         ))}
         <button
-          className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm"
+          className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm number"
           onClick={handleDecimalClick}
         >
           .
         </button>
         <button
-          className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm"
+          className="bg-white h-14 rounded-lg text-xl font-medium shadow-sm number"
           onClick={() => handleNumberClick('0')}
         >
           0
