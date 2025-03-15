@@ -48,6 +48,7 @@ const GameProvider = ({ children }) => {
     setHistory([]);
     setSeconds(0);
     setStartTime(new Date());
+    setUserAnswer('');
     
     // Generate a new drill chain
     const newDrillChain = generateDrillChain(difficulty);
@@ -92,7 +93,7 @@ const GameProvider = ({ children }) => {
       
       // Add bonus if final answer matches target
       if (Math.abs(numericAnswer - drillChain.targetNumber) < 0.01) {
-        setScore(score => score + 5 + 1); // +5 bonus, +1 for correct answer
+        setScore(score => score + 5); // +5 bonus for hitting the target
       }
     }
   };
@@ -101,6 +102,19 @@ const GameProvider = ({ children }) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+  
+  // Get total possible drills based on difficulty
+  const getTotalDrills = () => {
+    switch (difficulty) {
+      case 'easy':
+        return 10;
+      case 'medium':
+      case 'hard':
+        return 15;
+      default:
+        return 15;
+    }
   };
   
   const value = {
@@ -125,7 +139,8 @@ const GameProvider = ({ children }) => {
     startGame,
     getCurrentDrill,
     handleAnswer,
-    formatTime
+    formatTime,
+    getTotalDrills
   };
   
   return (
