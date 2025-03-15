@@ -60,7 +60,7 @@ const CompletedScreen = () => {
             
             {/* Target icon in center */}
             <circle cx="100" cy="50" r="20" fill={isTargetMatched ? "#10B981" : "#3B82F6"} />
-            <text x="100" y="55" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">
+            <text x="100" y="55" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" className="number">
               {isTargetMatched ? "✓" : drillChain.targetNumber}
             </text>
           </svg>
@@ -79,7 +79,7 @@ const CompletedScreen = () => {
                 className="absolute transform -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${(x / 200) * 100}%`, top: `${(y / 100) * 100}%` }}
               >
-                <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-blue-500 flex items-center justify-center text-blue-600 font-medium">
+                <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-blue-500 flex items-center justify-center text-blue-600 font-medium number">
                   {value}
                 </div>
                 <div className="absolute top-8 left-0 w-full text-center text-xs text-gray-500 font-medium">
@@ -94,7 +94,7 @@ const CompletedScreen = () => {
             className="absolute transform -translate-x-1/2 -translate-y-1/2"
             style={{ left: '50%', top: '10%' }}
           >
-            <div className="w-10 h-10 rounded-full bg-blue-600 shadow-lg flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-full bg-blue-600 shadow-lg flex items-center justify-center text-white font-bold number">
               {lastDrillAnswer}
             </div>
             <div className="absolute top-10 left-0 w-full text-center text-xs text-white font-medium bg-blue-600 rounded-md px-1">
@@ -111,7 +111,7 @@ const CompletedScreen = () => {
       <div className="bg-blue-100 p-6 rounded-lg w-full max-w-sm">
         <div className="text-center mb-4">
           <p className="text-sm text-gray-600">המספר הסופי שלך</p>
-          <p className={`text-4xl font-bold ${isTargetMatched ? 'text-green-600' : 'text-gray-700'}`}>
+          <p className={`text-4xl font-bold ${isTargetMatched ? 'text-green-600' : 'text-gray-700'} number`}>
             {lastDrillAnswer}
           </p>
         </div>
@@ -119,15 +119,15 @@ const CompletedScreen = () => {
         <div className="flex justify-between text-center">
           <div>
             <p className="text-sm text-gray-600">יעד</p>
-            <p className="text-xl font-bold text-blue-600">{drillChain.targetNumber}</p>
+            <p className="text-xl font-bold text-blue-600 number">{drillChain.targetNumber}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">זמן</p>
-            <p className="text-xl font-bold text-blue-600">{formattedTime}</p>
+            <p className="text-xl font-bold text-blue-600 number">{formattedTime}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">ניקוד</p>
-            <p className="text-xl font-bold text-blue-600">{finalScore}/{drillChain.totalDrills + 5}</p>
+            <p className="text-xl font-bold text-blue-600 number">{finalScore}/{drillChain.totalDrills + 5}</p>
           </div>
         </div>
       </div>
@@ -155,17 +155,17 @@ const CompletedScreen = () => {
           {history.map((item) => (
             <div key={item.drillId} className="flex items-center justify-between p-3 border-b border-gray-100">
               <div className="flex items-center">
-                <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs ml-2">
+                <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs ml-2 number">
                   {item.drillId}
                 </span>
-                <span className="text-gray-700">
-                  {drillChain.drills[item.drillId-1].startNumber} {drillChain.drills[item.drillId-1].operation} {drillChain.drills[item.drillId-1].operand}
+                <span className="text-gray-700 equation">
+                  <span className="number">{drillChain.drills[item.drillId-1].startNumber}</span> {drillChain.drills[item.drillId-1].operation} <span className="number">{drillChain.drills[item.drillId-1].operand}</span>
                 </span>
               </div>
               <div className="flex items-center">
-                <span className={`text-${item.isCorrect ? 'green' : 'red'}-600 font-medium`}>{item.userAnswer}</span>
+                <span className={`text-${item.isCorrect ? 'green' : 'red'}-600 font-medium number`}>{item.userAnswer}</span>
                 {!item.isCorrect && (
-                  <span className="text-xs text-gray-500 mr-2">({item.correctAnswer})</span>
+                  <span className="text-xs text-gray-500 mr-2 number">({item.correctAnswer})</span>
                 )}
               </div>
             </div>
