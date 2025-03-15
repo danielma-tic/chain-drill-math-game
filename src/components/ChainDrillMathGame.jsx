@@ -1,24 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { generateDrillChain } from '../utils/drillGenerator';
 
 const ChainDrillMathGame = () => {
   // Game state
   const [gameActive, setGameActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [userAnswers, setUserAnswers] = useState(['', '', '']);
-  const [feedback, setFeedback] = useState(['', '', '']);
-  const [gameComplete, setGameComplete] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const [timeLeft, setTimeLeft] = useState(60);
+  const [gameComplete, setGameComplete] = useState(false);
   
-  // References for input fields
-  const inputRefs = [useRef(null), useRef(null), useRef(null)];
+  // Dynamic game data based on difficulty
+  const [drillChain, setDrillChain] = useState(null);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [feedback, setFeedback] = useState([]);
+  const [inputRefs, setInputRefs] = useState([]);
   
-  // Game data
-  const gameSteps = [
-    { firstNum: 1, operator: '+', secondNum: 1, expectedResult: 2 },
-    { firstNum: 2, operator: '+', secondNum: 4, expectedResult: 6 },
-    { firstNum: 6, operator: '+', secondNum: 4, expectedResult: 10 }
-  ];
+  // Initialize game data based on difficulty
+  useEffect(() => {
+    const newDrillChain = generateDrillChain(difficulty);
+    setDrillChain(newDrillChain);
+    
+    // Initialize empty answers and feedback for each drill
+    const totalDrills = newDrillChain.totalDrills;
+    setUserAnswers(Array(totalDrills).fill(''));
+    setFeedback(Array(totalDrills).fill(''));
+    
+    // Create refs for each input
+    setInputRefs(Array(totalDrills).fill(0).map(() => React.createRef()));
+  }, [difficulty]);
+  
+  // Reset game state when difficulty changes
+  useEffect(() => {
+    if (gameActive) {
+      setGameActive(false);
+      setCurrentStep(0);
+      setGameComplete(false);
+    }
+  }, [difficulty]);
   
   // Handle user input
   const handleAnswerChange = (index, value) => {
@@ -34,14 +52,20 @@ const ChainDrillMathGame = () => {
   
   // Check user answer
   const checkAnswer = (index) => {
-    const userAnswer = parseInt(userAnswers[index]);
-    const expectedAnswer = gameSteps[index].expectedResult;
+    if (!drillChain) return;
+    
+    const userAnswer = parseFloat(userAnswers[index]);
+    const drill = drillChain.drills[index];
+    const expectedAnswer = drill.correctAnswer;
     
     const newFeedback = [...feedback];
     
-    if (userAnswer === expectedAnswer) {
+    // Using a small tolerance for floating point comparisons
+    const isCorrect = Math.abs(userAnswer - expectedAnswer) < 0.01;
+    
+    if (isCorrect) {
       newFeedback[index] = 'correct';
-      if (index < gameSteps.length - 1) {
+      if (index < drillChain.totalDrills - 1) {
         setCurrentStep(index + 1);
         // Focus next input after a correct answer
         setTimeout(() => {
@@ -61,12 +85,14 @@ const ChainDrillMathGame = () => {
   
   // Start new game
   const startGame = () => {
+    if (!drillChain) return;
+    
     setGameActive(true);
     setCurrentStep(0);
-    setUserAnswers(['', '', '']);
-    setFeedback(['', '', '']);
+    setUserAnswers(Array(drillChain.totalDrills).fill(''));
+    setFeedback(Array(drillChain.totalDrills).fill(''));
     setGameComplete(false);
-    setTimeLeft(60);
+    setTimeLeft(difficulty === 'easy' ? 120 : difficulty === 'medium' ? 180 : 240);
     
     // Focus first input
     setTimeout(() => {
@@ -97,6 +123,11 @@ const ChainDrillMathGame = () => {
     return () => clearTimeout(timer);
   }, [timeLeft, gameActive, gameComplete]);
   
+  // Render loading state if drill chain is not yet available
+  if (!drillChain) {
+    return <div className="container">Loading...</div>;
+  }
+  
   return (
     <div className="container">
       {/* Game header */}
@@ -117,9 +148,9 @@ const ChainDrillMathGame = () => {
             onChange={(e) => setDifficulty(e.target.value)}
             disabled={gameActive}
           >
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="easy">Easy (10 drills)</option>
+            <option value="medium">Medium (15 drills)</option>
+            <option value="hard">Hard (15 drills)</option>
           </select>
         </div>
         
@@ -133,7 +164,7 @@ const ChainDrillMathGame = () => {
         <div className="timer">
           <span className="timer-label">Time:</span>
           <span className={`timer-value ${timeLeft < 10 ? 'timer-low' : ''}`}>
-            {timeLeft}s
+            {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
           </span>
         </div>
       </div>
@@ -144,6 +175,7 @@ const ChainDrillMathGame = () => {
           <div className="overlay">
             <div className="overlay-content">
               <h2 className="overlay-title">Ready to Play?</h2>
+              <p>Complete all {drillChain.totalDrills} drills to reach the target number: {drillChain.targetNumber}</p>
               <button 
                 className="btn btn-success"
                 onClick={startGame}
@@ -169,122 +201,60 @@ const ChainDrillMathGame = () => {
           </div>
         )}
       
-        {/* Game chain visualization */}
-        <div className="chain">
-          {/* First equation row */}
-          <div className="equation-row">
-            <div className="equation">
-              <div className="number-box">
-                1
-              </div>
-              <div className="operator-box">
-                +
-              </div>
-              <div className="number-box">
-                1
-              </div>
-              <div className="operator-box">
-                =
-              </div>
-              <div className={`result-box ${feedback[0] === 'correct' ? 'correct-box' : feedback[0] === 'incorrect' ? 'incorrect-box' : ''}`}>
-                <input
-                  ref={inputRefs[0]}
-                  type="text"
-                  value={userAnswers[0]}
-                  onChange={(e) => handleAnswerChange(0, e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, 0)}
-                  onBlur={() => userAnswers[0] && checkAnswer(0)}
-                  className={`answer-input ${currentStep >= 0 ? '' : 'disabled'}`}
-                  disabled={currentStep !== 0 || !gameActive || feedback[0] === 'correct'}
-                  maxLength={2}
-                />
-                {feedback[0] === 'correct' && (
-                  <div className="check-mark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+        {/* Game chain visualization - scrollable for many drills */}
+        <div className="chain-container" style={{ maxHeight: '500px', overflowY: 'auto', padding: '1rem' }}>
+          <div className="chain">
+            {drillChain.drills.map((drill, index) => {
+              const isLastDrill = index === drillChain.totalDrills - 1;
+              const previousAnswerCorrect = index > 0 ? feedback[index - 1] === 'correct' : true;
+              
+              return (
+                <div key={index}>
+                  <div className="equation-row">
+                    <div className="equation">
+                      <div className={`number-box ${index > 0 && feedback[index - 1] === 'correct' ? 'correct-box' : ''}`}>
+                        {index === 0 || previousAnswerCorrect ? drill.startNumber : '?'}
+                      </div>
+                      <div className="operator-box">
+                        {drill.operation}
+                      </div>
+                      <div className="number-box">
+                        {drill.operand !== null ? drill.operand : ''}
+                      </div>
+                      <div className="operator-box">
+                        =
+                      </div>
+                      <div className={`result-box ${feedback[index] === 'correct' ? 'correct-box' : feedback[index] === 'incorrect' ? 'incorrect-box' : ''}`}>
+                        <input
+                          ref={inputRefs[index]}
+                          type="text"
+                          value={userAnswers[index]}
+                          onChange={(e) => handleAnswerChange(index, e.target.value)}
+                          onKeyPress={(e) => handleKeyPress(e, index)}
+                          onBlur={() => userAnswers[index] && checkAnswer(index)}
+                          className={`answer-input ${currentStep >= index ? '' : 'disabled'}`}
+                          disabled={currentStep !== index || !gameActive || feedback[index] === 'correct'}
+                          maxLength={6}
+                        />
+                        {feedback[index] === 'correct' && (
+                          <div className="check-mark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Arrow to next equation, except for the last one */}
+                    {!isLastDrill && (
+                      <>
+                        <div className="arrow"></div>
+                        <div className="arrow-tip"></div>
+                      </>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Arrow to next equation */}
-            <div className="arrow"></div>
-            <div className="arrow-tip"></div>
-          </div>
-          
-          {/* Second equation row */}
-          <div className="equation-row">
-            <div className="equation">
-              <div className={`number-box ${feedback[0] === 'correct' ? 'correct-box' : ''}`}>
-                {feedback[0] === 'correct' ? '2' : '?'}
-              </div>
-              <div className="operator-box">
-                +
-              </div>
-              <div className="number-box">
-                4
-              </div>
-              <div className="operator-box">
-                =
-              </div>
-              <div className={`result-box ${feedback[1] === 'correct' ? 'correct-box' : feedback[1] === 'incorrect' ? 'incorrect-box' : ''}`}>
-                <input
-                  ref={inputRefs[1]}
-                  type="text"
-                  value={userAnswers[1]}
-                  onChange={(e) => handleAnswerChange(1, e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, 1)}
-                  onBlur={() => userAnswers[1] && checkAnswer(1)}
-                  className={`answer-input ${currentStep >= 1 ? '' : 'disabled'}`}
-                  disabled={currentStep !== 1 || !gameActive || feedback[1] === 'correct'}
-                  maxLength={2}
-                />
-                {feedback[1] === 'correct' && (
-                  <div className="check-mark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Arrow to next equation */}
-            <div className="arrow"></div>
-            <div className="arrow-tip"></div>
-          </div>
-          
-          {/* Third equation row */}
-          <div className="equation-row">
-            <div className="equation">
-              <div className={`number-box ${feedback[1] === 'correct' ? 'correct-box' : ''}`}>
-                {feedback[1] === 'correct' ? '6' : '?'}
-              </div>
-              <div className="operator-box">
-                +
-              </div>
-              <div className="number-box">
-                4
-              </div>
-              <div className="operator-box">
-                =
-              </div>
-              <div className={`result-box ${feedback[2] === 'correct' ? 'correct-box' : feedback[2] === 'incorrect' ? 'incorrect-box' : ''}`}>
-                <input
-                  ref={inputRefs[2]}
-                  type="text"
-                  value={userAnswers[2]}
-                  onChange={(e) => handleAnswerChange(2, e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, 2)}
-                  onBlur={() => userAnswers[2] && checkAnswer(2)}
-                  className={`answer-input ${currentStep >= 2 ? '' : 'disabled'}`}
-                  disabled={currentStep !== 2 || !gameActive || feedback[2] === 'correct'}
-                  maxLength={2}
-                />
-                {feedback[2] === 'correct' && (
-                  <div className="check-mark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                  </div>
-                )}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
         
@@ -292,7 +262,11 @@ const ChainDrillMathGame = () => {
         <div className="target-container">
           <div className="target-box">
             <span className="target-label">Target:</span>
-            <span className="target-value">10</span>
+            <span className="target-value">{drillChain.targetNumber}</span>
+          </div>
+          <div className="progress-indicator">
+            <span className="progress-label">Progress:</span>
+            <span className="progress-value">{currentStep} / {drillChain.totalDrills}</span>
           </div>
         </div>
       </div>
@@ -304,7 +278,7 @@ const ChainDrillMathGame = () => {
           <li>Solve each equation and enter the answer</li>
           <li>After a correct answer, it will automatically move to the next equation</li>
           <li>The answer to each step becomes the first number of the next equation</li>
-          <li>Complete the chain to reach the target number</li>
+          <li>Complete all {drillChain.totalDrills} steps to reach the target number ({drillChain.targetNumber})</li>
         </ol>
       </div>
     </div>
