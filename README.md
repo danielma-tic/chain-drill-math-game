@@ -1,80 +1,49 @@
-# Chain Drill Math Game | משחק שרשרת חשבונית
-
-משחק מתמטי אינטראקטיבי שבו כל תשובה הופכת למספר ההתחלתי של התרגיל הבא, במטרה להגיע למספר יעד.
+# Chain Drill Math Game
 
 A mathematical chain drill game where each answer becomes the start of the next equation, building towards a target number.
 
-## סקירה כללית | Overview
+## Overview
 
-Chain Drill הוא משחק חינוכי מתמטי המיועד לתרגול מיומנויות חשבון בדרך מהנה ומאתגרת. השחקן פותר סדרה של תרגילים מתמטיים כאשר התוצאה של כל תרגיל הופכת למספר ההתחלתי של התרגיל הבא. המטרה היא להגיע למספר יעד מוגדר מראש בסוף השרשרת.
+This educational game helps students practice math operations in a chain format, where the result of each calculation becomes the input for the next one. This reinforces mental math skills and helps build understanding of mathematical relationships.
 
-Chain Drill is an educational math game designed to improve mental math skills through a series of interconnected exercises. Players solve 15 consecutive math problems where the answer to each problem becomes the starting number for the next problem. The goal is to reach a specific target number by the end of the chain.
+## Features
 
-## תכונות עיקריות | Features
+- Interactive chain-based math equations
+- Multiple difficulty levels
+- Timer for added challenge
+- Visual feedback on correct/incorrect answers
+- Clean, intuitive interface
+- Automatic progression through the chain
 
-- שלוש רמות קושי: קל, בינוני וקשה
-- מעקב ויזואלי אחר התקדמות עם מפת דרכים אינטואיטיבית
-- מערכת ניקוד עם בונוסים על הגעה למספר היעד
-- עיצוב רספונסיבי למובייל ולדסקטופ
-- תמיכה במספרים שלמים ועשרוניים
-- ממשק בעברית
+## How to Play
 
-## דרישות מערכת | Prerequisites
+1. Solve each equation and enter the answer
+2. After a correct answer, it will automatically move to the next equation
+3. The answer to each step becomes the first number of the next equation
+4. Complete the chain to reach the target number
 
-- Node.js (גרסה 14 ומעלה)
-- npm או yarn
-
-## התקנה | Installation
+## Installation
 
 ```bash
-# שיבוט המאגר
+# Clone the repository
 git clone https://github.com/danielma-tic/chain-drill-math-game.git
 
-# מעבר לספריית הפרויקט
+# Navigate to the project directory
 cd chain-drill-math-game
 
-# התקנת תלויות
+# Install dependencies
 npm install
 
-# הפעלת שרת הפיתוח
-npm start
+# Start the development server
+npm run dev
 ```
 
-האפליקציה תהיה זמינה בכתובת http://localhost:3000
+## Technologies Used
 
-## רמות קושי | Difficulty Levels
-
-### קל | Easy
-- פעולות: חיבור (+), חיסור (-), כפל (×)
-- מספרים שלמים בלבד עד 100
-- 10 תרגילים בשרשרת
-
-### בינוני | Medium
-- פעולות: חיבור (+), חיסור (-), כפל (×), חילוק (÷)
-- מספרים שלמים עד 150
-- 15 תרגילים בשרשרת
-
-### קשה | Hard
-- פעולות: חיבור (+), חיסור (-), כפל (×), חילוק (÷), בריבוע (²)
-- מספרים שלמים וחצאי מספרים עד 200
-- 15 תרגילים בשרשרת
-
-## איך משחקים | How to Play
-
-1. בחר רמת קושי במסך הפתיחה
-2. פתור כל תרגיל בשרשרת
-3. השתמש במקלדת המספרית להזנת תשובות
-4. עקוב אחר התקדמותך במפת הדרכים
-5. נסה להגיע למספר היעד בסוף השרשרת
-6. צפה בניקוד ובסטטיסטיקות שלך במסך הסיום
-
-## מידע טכני | Technical Details
-
-פרויקט זה נבנה באמצעות:
 - React.js
-- TailwindCSS
-- React Hooks וContext API
+- Tailwind CSS
+- JavaScript ES6+
 
-## רישיון | License
+## License
 
-פרויקט זה מורשה תחת רישיון MIT - ראה את קובץ LICENSE לפרטים.
+MIT
